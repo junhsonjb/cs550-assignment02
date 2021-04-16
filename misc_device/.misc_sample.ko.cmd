@@ -1,0 +1,1 @@
+cmd_/home/jjeanba2/misc_device/misc_sample.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000  --build-id  -T ./scripts/module-common.lds -o /home/jjeanba2/misc_device/misc_sample.ko /home/jjeanba2/misc_device/misc_sample.o /home/jjeanba2/misc_device/misc_sample.mod.o;  true

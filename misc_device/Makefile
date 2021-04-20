@@ -4,6 +4,7 @@
 
 # This conditional selects whether we are being included from the
 # kernel Makefile or not.
+obj-m := misc_sample.o 
 ifeq ($(KERNELRELEASE),)
 
 	# Assume the source tree is where the running kernel was built
@@ -26,5 +27,5 @@ clean:
 
 else
 	# called from kernel build system: just declare what our modules are
-	obj-m := misc_sample.o misc_sample.o 
+	obj-m := misc_sample.o 
 endif

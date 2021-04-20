@@ -28,6 +28,8 @@ __used __section(__versions) = {
 	{ 0x48b8b3f6, "no_llseek" },
 	{ 0xfc1f10d, "misc_deregister" },
 	{ 0x4647c4a0, "misc_register" },
+	{ 0xb44ad4b3, "_copy_to_user" },
+	{ 0x88db9f48, "__check_object_size" },
 	{ 0xc5850110, "printk" },
 	{ 0xbdfb6dbb, "__fentry__" },
 };
@@ -35,4 +37,4 @@ __used __section(__versions) = {
 MODULE_INFO(depends, "");
 
 
-MODULE_INFO(srcversion, "8055951DF074120E7202F5F");
+MODULE_INFO(srcversion, "C3813CC062992CD819A2D22");

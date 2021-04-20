@@ -886,6 +886,16 @@ deps_/home/jjeanba2/cs550-assignment02/misc_device/misc_sample.o := \
   arch/x86/include/asm/smap.h \
   arch/x86/include/asm/extable.h \
   arch/x86/include/asm/uaccess_64.h \
+  include/linux/slab.h \
+    $(wildcard include/config/debug/slab.h) \
+    $(wildcard include/config/failslab.h) \
+    $(wildcard include/config/have/hardened/usercopy/allocator.h) \
+    $(wildcard include/config/slab.h) \
+    $(wildcard include/config/slub.h) \
+    $(wildcard include/config/slob.h) \
+  include/linux/percpu-refcount.h \
+  include/linux/kasan.h \
+    $(wildcard include/config/kasan/generic.h) \
 
 /home/jjeanba2/cs550-assignment02/misc_device/misc_sample.o: $(deps_/home/jjeanba2/cs550-assignment02/misc_device/misc_sample.o)
 

@@ -3,6 +3,8 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/uaccess.h>
+#include <linux/slab.h>
+#define DEVICE_NAME "misc_sample"
 
 static int sample_open(struct inode *inode, struct file *file)
 {
@@ -26,7 +28,7 @@ static ssize_t sample_write(struct file *file, const char __user *buf,
 static ssize_t sample_read(struct file *file, char __user * out, size_t size, loff_t * off)
 {
 	// pr_info("We're trying to READ\n");
-	char * buffer;
+	char * buffer = (char*) kmalloc(10*sizeof(char), GFP_USER);
 	sprintf(buffer, "Hello World!");
 	copy_to_user(out, buffer, strlen(buffer) + 1);
 	return size;
@@ -43,7 +45,7 @@ static const struct file_operations sample_fops = {
 
 struct miscdevice sample_device = {
     .minor = MISC_DYNAMIC_MINOR,
-    .name = "misc_sample",
+    .name = DEVICE_NAME,
     .fops = &sample_fops,
 };
 

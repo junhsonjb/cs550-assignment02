@@ -4,9 +4,9 @@
 #include <linux/module.h>
 #include <linux/uaccess.h>
 #include <linux/slab.h>
-#include <linux/sched.h>
+#include <linux/proc_fs.h>
 #include <linux/sched/signal.h>
-#define DEVICE_NAME "process_list"
+#define DEVICE_NAME "misc_sample"
 
 static int sample_open(struct inode *inode, struct file *file)
 {
@@ -27,9 +27,6 @@ static ssize_t sample_write(struct file *file, const char __user *buf,
     return len; /* But we don't actually do anything with the data */
 }
 
-/*
- * This is the function that we need to work on for the kernel module!
- */
 static ssize_t sample_read(struct file *file, char __user * out, size_t size, loff_t * off)
 {
 	/*
@@ -40,27 +37,20 @@ static ssize_t sample_read(struct file *file, char __user * out, size_t size, lo
 	return size;
 	*/
 
-	char * buffer  = (char*) kmalloc(100*sizeof(char), GFP_USER); // more than 10????
-	// char * line  = (char*) kmalloc(10*sizeof(char), GFP_USER); // more than 10????
 	struct task_struct * task_list;
+	int counter = 0;
+	int numsize = sizeof(task_list) / sizeof(struct task_struct);
 
-	int pid;
-	int ppid; // parent pid
-	int cpu;
-	long current_state; // will parse this raw value in userspace code
-	int len = 0;
-
-	for_each_process(task_list) {
-		pid = task_list->pid;
-		ppid = task_list->real_parent->pid;
-		// cpu = task_list->thread_info.cpu;
-		cpu = task_cpu(task_list);
-		current_state = task_list->state;
-
-		len += sprintf(buffer + len, "%d %d %d %ld\n", pid, ppid, cpu, current_state);
+	if (numsize == 0) {
+		pr_info("numsize is 0\n");
+	} else {
+		pr_info("task_list has been populated\n");
 	}
 
-	copy_to_user(out, buffer, strlen(buffer) + 1);
+	for_each_process(task_list) {
+		pr_info("this is happening, #%d\n", counter);
+		counter += 1;
+	}
 
 	return size;
 }

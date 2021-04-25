@@ -32,15 +32,8 @@ static ssize_t sample_write(struct file *file, const char __user *buf,
  */
 static ssize_t sample_read(struct file *file, char __user * out, size_t size, loff_t * off)
 {
-	/*
-	// pr_info("We're trying to READ\n");
-	char * buffer = (char*) kmalloc(10*sizeof(char), GFP_USER);
-	sprintf(buffer, "Hello World!");
-	copy_to_user(out, buffer, strlen(buffer) + 1);
-	return size;
-	*/
 
-	char * buffer  = (char*) kmalloc(100*sizeof(char), GFP_USER); // more than 10????
+	char * buffer  = (char*) kmalloc(1000*sizeof(char), GFP_USER); // more than 10????
 	// char * line  = (char*) kmalloc(10*sizeof(char), GFP_USER); // more than 10????
 	struct task_struct * task_list;
 
@@ -60,7 +53,15 @@ static ssize_t sample_read(struct file *file, char __user * out, size_t size, lo
 		len += sprintf(buffer + len, "%d %d %d %ld\n", pid, ppid, cpu, current_state);
 	}
 
-	copy_to_user(out, buffer, strlen(buffer) + 1);
+	/*
+	int i;
+	for (i = 0; i < 5; i++) {
+		len += sprintf(buffer + len, "yoooo sonnnnnn\n");
+	}
+	*/
+
+	// copy_to_user(out, "hello people", 12);
+	copy_to_user(out, buffer, len + 1);
 
 	return size;
 }

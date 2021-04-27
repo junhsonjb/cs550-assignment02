@@ -6,12 +6,56 @@
 #include <linux/slab.h>
 #include <linux/sched.h>
 #include <linux/sched/signal.h>
+
+#include "process_list.h"
+
 #define DEVICE_NAME "process_list"
 
+int procs_num; // actual number of entries in procs array
+process_record process_list[PROCS_CAP];
+
+process_record create_record(int pid_in, int ppid_in, int cpu_in, long cs_in) {
+	process_record p;
+	p.pid = pid_in;
+	p.ppid = ppid_in;
+	p.cpu = cpu_in;
+	p.current_state = cs_in;
+	p.valid = 100;
+
+	return p;
+}
+
+/*
+ * Populate the global process_list here so that we can access it from
+ * read(...) in order to return list of processes to userspace program!
+ */
 static int sample_open(struct inode *inode, struct file *file)
 {
-    pr_info("I have been awoken\n");
-    return 0;
+
+	struct task_struct * task_list;
+	
+	int pid;
+	int ppid; // parent pid
+	int cpu;
+	long current_state; // will parse this raw value in userspace code
+	int index = 0;
+	
+	for_each_process(task_list) {
+		pid = task_list->pid;
+		ppid = task_list->real_parent->pid;
+		cpu = task_cpu(task_list);
+		current_state = task_list->state;
+
+		process_record proc = create_record(pid, ppid, cpu, current_state);
+		process_list[index] = proc;
+
+		index += 1;
+	}
+
+	procs_num = index;
+
+	pr_info("I have been awoken\n");
+	return 0;
 }
 
 static int sample_close(struct inode *inodep, struct file *filp)
@@ -33,35 +77,9 @@ static ssize_t sample_write(struct file *file, const char __user *buf,
 static ssize_t sample_read(struct file *file, char __user * out, size_t size, loff_t * off)
 {
 
-	char * buffer  = (char*) kmalloc(1000*sizeof(char), GFP_USER); // more than 10????
-	// char * line  = (char*) kmalloc(10*sizeof(char), GFP_USER); // more than 10????
-	struct task_struct * task_list;
-
-	int pid;
-	int ppid; // parent pid
-	int cpu;
-	long current_state; // will parse this raw value in userspace code
-	int len = 0;
-
-	for_each_process(task_list) {
-		pid = task_list->pid;
-		ppid = task_list->real_parent->pid;
-		// cpu = task_list->thread_info.cpu;
-		cpu = task_cpu(task_list);
-		current_state = task_list->state;
-
-		len += sprintf(buffer + len, "%d %d %d %ld\n", pid, ppid, cpu, current_state);
-	}
-
-	/*
-	int i;
-	for (i = 0; i < 5; i++) {
-		len += sprintf(buffer + len, "yoooo sonnnnnn\n");
-	}
-	*/
-
-	// copy_to_user(out, "hello people", 12);
-	copy_to_user(out, buffer, len + 1);
+	char * buffer  = (char*) kmalloc(PROCS_CAP*sizeof(process_record), GFP_USER); // more than 10????
+	copy_to_user(out, process_list, (PROCS_CAP*sizeof(process_record)));
+	kfree(buffer);
 
 	return size;
 }

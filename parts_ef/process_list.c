@@ -25,6 +25,18 @@ process_record create_record(int pid_in, int ppid_in, int cpu_in, long cs_in) {
 	return p;
 }
 
+int count_procs(process_record * buffer) {
+	int num = PROCS_CAP;
+	int count = 0;
+	int i;
+	for (i = 0; i < num; i++) {
+		if (buffer[i].pid == 0) {
+			count += 1;	
+		}
+	}
+	return count;
+}
+
 /*
  * Populate the global process_list here so that we can access it from
  * read(...) in order to return list of processes to userspace program!
@@ -33,6 +45,7 @@ static int sample_open(struct inode *inode, struct file *file)
 {
 
 	struct task_struct * task_list;
+	process_record proc;
 	
 	int pid;
 	int ppid; // parent pid
@@ -44,9 +57,9 @@ static int sample_open(struct inode *inode, struct file *file)
 		pid = task_list->pid;
 		ppid = task_list->real_parent->pid;
 		cpu = task_cpu(task_list);
-		current_state = task_list->state;
+		current_state = task_list->state; // use strcpy
 
-		process_record proc = create_record(pid, ppid, cpu, current_state);
+	       	proc = create_record(pid, ppid, cpu, current_state);
 		process_list[index] = proc;
 
 		index += 1;
@@ -67,7 +80,7 @@ static int sample_close(struct inode *inodep, struct file *filp)
 static ssize_t sample_write(struct file *file, const char __user *buf,
 		       size_t len, loff_t *ppos)
 {
-    pr_info("Yummy - I just ate %d bytes\n", len);
+    pr_info("Yummy - I just ate %lu bytes\n", len);
     return len; /* But we don't actually do anything with the data */
 }
 
@@ -77,11 +90,11 @@ static ssize_t sample_write(struct file *file, const char __user *buf,
 static ssize_t sample_read(struct file *file, char __user * out, size_t size, loff_t * off)
 {
 
-	char * buffer  = (char*) kmalloc(PROCS_CAP*sizeof(process_record), GFP_USER); // more than 10????
+	int count;
 	copy_to_user(out, process_list, (PROCS_CAP*sizeof(process_record)));
-	kfree(buffer);
+	count = count_procs(process_list);
 
-	return size;
+	return count;
 }
 
 static const struct file_operations sample_fops = {
